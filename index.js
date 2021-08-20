@@ -1,5 +1,5 @@
 const canvas = document.getElementById('screen');
-const ctx = canvas.getContext('2d');
+const ctx = canvas.getContext('2d', {alpha : false});
 
 let start, previousTimeStamp;
 
@@ -12,6 +12,10 @@ const deg2rad = (deg) => {
 
 const randomInt = (min, max) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
+const randomItem = (array) => {
+    return array[Math.floor(Math.random() * array.length)];
 };
 
 // ctx.strokeStyle = 
@@ -33,16 +37,10 @@ class Acceleratable {
     }
 }
 
-const tank1 = {
+const playerTank = {
+    color: '#fff',
     x: new Acceleratable(50),
     y: new Acceleratable(50),
-    rotation: new Acceleratable(0),
-    towerRotation: new Acceleratable(0),
-};
-
-const tank2 = {
-    x: new Acceleratable(200),
-    y: new Acceleratable(200),
     rotation: new Acceleratable(0),
     towerRotation: new Acceleratable(0),
 };
@@ -50,18 +48,22 @@ const tank2 = {
 const tankInputs = {
     forward: 0,
     turnRight: 0,
+    turnTowerRight: 0,
 };
 
 function drawTank(tank) {
     const width = 64;
     const height = 48;
     ctx.save();
+    ctx.strokeStyle = tank.color;
     ctx.translate(tank.x.value, tank.y.value);
     ctx.rotate(deg2rad(tank.rotation.value));
     // Base
+    ctx.fillRect(-width / 2, -height / 2, width, height);
     ctx.strokeRect(-width / 2, -height / 2, width, height);
+    // Klappen
     ctx.strokeRect(-width / 2, -height / 3, width / 9, height / 9);
-    ctx.strokeRect(-width / 2, height / 3, width / 9, height / 9);
+    ctx.strokeRect(-width / 2, height / 3 - height / 9, width / 9, height / 9);
     // Tower
     ctx.save();
     ctx.rotate(deg2rad(tank.towerRotation.value));
@@ -69,7 +71,7 @@ function drawTank(tank) {
     // Zielrohr
     ctx.beginPath();
     ctx.moveTo(0, 0);
-    ctx.lineTo(-width * 0.6, 0);
+    ctx.lineTo(width * 0.6, 0);
     ctx.stroke();
     ctx.restore();
     ctx.restore();
@@ -79,11 +81,13 @@ function stepTank(tank, tankInputs, delta) {
     tank.x.acceleration = Math.cos(deg2rad(tank.rotation.value)) * tankInputs.forward * 30;
     tank.y.acceleration = Math.sin(deg2rad(tank.rotation.value)) * tankInputs.forward * 30;
     tank.rotation.acceleration = tankInputs.turnRight * 5;
+    tank.towerRotation.acceleration = tankInputs.turnTowerRight * 50;
 
     // Friction
     tank.x.speed *= 0.9;
     tank.y.speed *= 0.9;
     tank.rotation.speed *= 0.9;
+    tank.towerRotation.speed *= 0.6;
 
     tank.x.step(delta);
     tank.y.step(delta);
@@ -95,6 +99,7 @@ const tanks = [];
 
 for (let i = 0; i < 50; i++) {
     const tank = {
+        color: `#${randomItem('5,7,9,a,c,d,d,e,f'.split(','))}${randomItem('5,7,9,a,c,d,d,e,f'.split(','))}${randomItem('5,7,9,a,c,d,d,e,f'.split(','))}`,
         x: new Acceleratable(randomInt(0, 1500)),
         y: new Acceleratable(randomInt(0, 700)),
         rotation: new Acceleratable(0),
@@ -113,9 +118,7 @@ function step(timestamp) {
     
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    stepTank(tank1, tankInputs, delta);
-    drawTank(tank1);
-
+    
     for (const tank of tanks) {
         stepTank(tank, {
             forward: randomInt(-1, 1),
@@ -123,8 +126,11 @@ function step(timestamp) {
         }, delta);
         drawTank(tank);
     }
+
+    stepTank(playerTank, tankInputs, delta);
+    drawTank(playerTank);
     
-    ctx.fillText(tank1.x.value, 0, 10);
+    // ctx.fillText(tank1.x.value, 0, 10);
 
     previousTimeStamp = timestamp;
     window.requestAnimationFrame(step);
@@ -144,6 +150,12 @@ window.addEventListener('keydown', event => {
     if (event.key === 'a') {
         tankInputs.turnRight = -1;
     }
+    if (event.key === 'ArrowRight') {
+        tankInputs.turnTowerRight = 1;
+    }
+    if (event.key === 'ArrowLeft') {
+        tankInputs.turnTowerRight = -1;
+    }
 });
 
 window.addEventListener('keyup', event => {
@@ -158,6 +170,12 @@ window.addEventListener('keyup', event => {
     }
     if (event.key === 'a') {
         tankInputs.turnRight = 0;
+    }
+    if (event.key === 'ArrowRight') {
+        tankInputs.turnTowerRight = 0;
+    }
+    if (event.key === 'ArrowLeft') {
+        tankInputs.turnTowerRight = 0;
     }
 });
 
