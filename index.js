@@ -18,6 +18,14 @@ const randomItem = (array) => {
     return array[Math.floor(Math.random() * array.length)];
 };
 
+const withinRange = (value, target, range = 0) => {
+    return value <= target + range && value >= target - range;
+}
+
+const limit = (value, min, max) => {
+    return Math.max(min, Math.min(max, value));
+}
+
 // ctx.strokeStyle = 
 ctx.lineWidth = 0.5;
 
@@ -49,6 +57,53 @@ const tankInputs = {
     forward: 0,
     turnRight: 0,
     turnTowerRight: 0,
+};
+
+const tankAIDriver = (tank, desiredState) => {
+    const inputs = {
+        forward: 0,
+        turnRight: 0,
+        turnTowerRight: 0,
+    };
+    if (tank.x.value < desiredState.x.value) {
+        inputs.forward = Math.sin(deg2rad(90 + tank.rotation.value % 360));
+    } else if (tank.x.value > desiredState.x.value) {
+        inputs.forward = -Math.sin(deg2rad(90 + tank.rotation.value % 360));
+    }
+    if (tank.y.value < desiredState.y.value) {
+        inputs.forward += -Math.cos(deg2rad(90 + tank.rotation.value % 360));
+    } else if (tank.y.value > desiredState.y.value) {
+        inputs.forward += Math.cos(deg2rad(90 + tank.rotation.value % 360));
+    }
+    inputs.forward = limit(inputs.forward, -1, 1);
+    const rotationDiff = ((tank.rotation.value - desiredState.rotation.value) % 360 + 360) % 360;
+    if (rotationDiff > 180) {
+        inputs.turnRight = 1;
+    } else if (rotationDiff < 180) {
+        inputs.turnRight = -1;
+    }
+    // TODO: Increase acceptable error if the tank is far away from the destination and reduce it when we get closer
+    if (withinRange(tank.x.value, desiredState.x.value, 25) && !withinRange(tank.y.value, desiredState.y.value, 25)) {
+        // X-Position stimmt, aber Y-Position nicht
+        // TODO: Intelligently pick the direction to turn to
+        inputs.turnRight = 1;
+    // TODO: Increase acceptable error if the tank is far away from the destination and reduce it when we get closer
+    } else if (withinRange(tank.y.value, desiredState.y.value, 25) && !withinRange(tank.x.value, desiredState.x.value, 25)) {
+        // Y-Position stimmt, aber X-Position nicht
+        // TODO: Intelligently pick the direction to turn to
+        inputs.turnRight = -1;
+    }
+    if (withinRange(inputs.forward, 0, 0.01) && !withinRange(tank.x.value, desiredState.x.value, 25) && !withinRange(tank.y.value, desiredState.y.value, 25)) {
+        // X-Position stimmt, aber Y-Position nicht
+        inputs.turnRight = 1;
+    }
+    const towerRotationDiff = ((tank.towerRotation.value - desiredState.towerRotation.value) % 360 + 360) % 360;
+    if (towerRotationDiff > 180) {
+        inputs.turnTowerRight = 1;
+    } else if (towerRotationDiff < 180) {
+        inputs.turnTowerRight = -1;
+    }
+    return inputs;
 };
 
 function drawTank(tank) {
@@ -97,15 +152,25 @@ function stepTank(tank, tankInputs, delta) {
 
 const tanks = [];
 
-for (let i = 0; i < 50; i++) {
-    const tank = {
+for (let i = 0; i < 4; i++) {
+    const state = {
         color: `#${randomItem('5,7,9,a,c,d,d,e,f'.split(','))}${randomItem('5,7,9,a,c,d,d,e,f'.split(','))}${randomItem('5,7,9,a,c,d,d,e,f'.split(','))}`,
         x: new Acceleratable(randomInt(0, 1500)),
         y: new Acceleratable(randomInt(0, 700)),
         rotation: new Acceleratable(0),
         towerRotation: new Acceleratable(0),
     };
-    tanks.push(tank);
+    const desiredState = {
+        ...state,
+        x: new Acceleratable(randomInt(0, 1500)),
+        y: new Acceleratable(randomInt(0, 700)),
+        rotation: new Acceleratable(randomInt(0, 359)),
+        towerRotation: new Acceleratable(randomInt(0, 359)),
+    };
+    tanks.push({
+        state,
+        desiredState,   
+    });
 }
 
 function step(timestamp) {
@@ -113,33 +178,30 @@ function step(timestamp) {
         start = timestamp;
         previousTimeStamp = start;
     }
-    const elapsed = timestamp - start;
-    const delta = (timestamp - previousTimeStamp) / 1000;
+    // const elapsed = timestamp - start;
+    const delta = limit((timestamp - previousTimeStamp) / 1000, 0, 0.05);
     previousTimeStamp = timestamp;
     
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     
     for (const tank of tanks) {
-        stepTank(tank, {
-            forward: randomInt(-1, 1),
-            turnRight: randomInt(-1, 1),
-            turnTowerRight: randomInt(-1, 1),
-        }, delta);
-        drawTank(tank);
+        const inputs = tankAIDriver(tank.state, tank.desiredState);
+        stepTank(tank.state, inputs, delta);
+        drawTank(tank.state);
+        drawTank(tank.desiredState);
     }
 
     stepTank(playerTank, tankInputs, delta);
     drawTank(playerTank);
     
-    ctx.fillStyle = 'white';
-    ctx.fillText(`${elapsed.toFixed(0)} ${previousTimeStamp.toFixed(0)}`, 0, 10);
-    ctx.fillStyle = 'black';
+    // ctx.fillStyle = 'white';
+    // ctx.fillText(`${elapsed.toFixed(0)} ${previousTimeStamp.toFixed(0)}`, 0, 10);
+    // ctx.fillStyle = 'black';
     window.requestAnimationFrame(step);
 }
 
 window.addEventListener('keydown', event => {
-    console.log(event);
     if (event.key === 'w') {
         tankInputs.forward = 1;
     }
