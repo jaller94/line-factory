@@ -78,10 +78,10 @@ function drawTank(tank) {
 }
 
 function stepTank(tank, tankInputs, delta) {
-    tank.x.acceleration = Math.cos(deg2rad(tank.rotation.value)) * tankInputs.forward * 30;
-    tank.y.acceleration = Math.sin(deg2rad(tank.rotation.value)) * tankInputs.forward * 30;
-    tank.rotation.acceleration = tankInputs.turnRight * 5;
-    tank.towerRotation.acceleration = tankInputs.turnTowerRight * 50;
+    tank.x.acceleration = Math.cos(deg2rad(tank.rotation.value)) * tankInputs.forward * 300;
+    tank.y.acceleration = Math.sin(deg2rad(tank.rotation.value)) * tankInputs.forward * 300;
+    tank.rotation.acceleration = tankInputs.turnRight * 100;
+    tank.towerRotation.acceleration = tankInputs.turnTowerRight * 1000;
 
     // Friction
     tank.x.speed *= 0.9;
@@ -114,7 +114,8 @@ function step(timestamp) {
         previousTimeStamp = start;
     }
     const elapsed = timestamp - start;
-    const delta = (elapsed - previousTimeStamp) / 1000;
+    const delta = (timestamp - previousTimeStamp) / 1000;
+    previousTimeStamp = timestamp;
     
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -123,6 +124,7 @@ function step(timestamp) {
         stepTank(tank, {
             forward: randomInt(-1, 1),
             turnRight: randomInt(-1, 1),
+            turnTowerRight: randomInt(-1, 1),
         }, delta);
         drawTank(tank);
     }
@@ -130,9 +132,9 @@ function step(timestamp) {
     stepTank(playerTank, tankInputs, delta);
     drawTank(playerTank);
     
-    // ctx.fillText(tank1.x.value, 0, 10);
-
-    previousTimeStamp = timestamp;
+    ctx.fillStyle = 'white';
+    ctx.fillText(`${elapsed.toFixed(0)} ${previousTimeStamp.toFixed(0)}`, 0, 10);
+    ctx.fillStyle = 'black';
     window.requestAnimationFrame(step);
 }
 
