@@ -52,7 +52,8 @@ function step(timestamp) {
     const delta = limit((timestamp - previousTimeStamp) / 1000, 0, 0.05);
     previousTimeStamp = timestamp;
     
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.save();
     ctx.translate(canvas.width / 2, canvas.height / 2);
