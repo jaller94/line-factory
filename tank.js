@@ -52,56 +52,43 @@ export const tankAIDriver = (tank, desiredState) => {
     return inputs;
 };
 
-export const drawTank = (ctx, tank) => {
-    const width = 64;
-    const height = 48;
+export const drawTank = (ctx, ship) => {
     ctx.save();
-    ctx.strokeStyle = tank.color;
-    ctx.translate(tank.x.value, tank.y.value);
-    ctx.rotate(deg2rad(tank.rotation.value));
+    ctx.strokeStyle = ship.color;
+    ctx.translate(ship.x.value, ship.y.value);
+    ctx.rotate(deg2rad(ship.rotation.value + 90));
     // Base
-    ctx.fillRect(-width / 2, -height / 2, width, height);
-    ctx.strokeRect(-width / 2, -height / 2, width, height);
-    // Klappen
-    ctx.strokeRect(-width / 2, -height / 3, width / 9, height / 9);
-    ctx.strokeRect(-width / 2, height / 3 - height / 9, width / 9, height / 9);
-    // Tower
-    ctx.save();
-    ctx.rotate(deg2rad(tank.towerRotation.value));
-    ctx.strokeRect(-width / 4, -height / 4, width / 2, height / 2);
-    // Zielrohr
     ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(width * 0.6, 0);
+    ctx.moveTo(0, -6);
+    ctx.lineTo(3, 3);
+    ctx.lineTo(0, 1);
+    ctx.lineTo(-3, 3);
+    ctx.lineTo(0, -6);
     ctx.stroke();
     ctx.restore();
-    ctx.restore();
 }
 
-export const stepTank = (tank, tankInputs, delta) => {
-    tank.x.acceleration = Math.cos(deg2rad(tank.rotation.value)) * tankInputs.forward * 300;
-    tank.y.acceleration = Math.sin(deg2rad(tank.rotation.value)) * tankInputs.forward * 300;
-    tank.rotation.acceleration = tankInputs.turnRight * 100;
-    tank.towerRotation.acceleration = tankInputs.turnTowerRight * 1000;
+export const stepTank = (ship, shipInputs, delta) => {
+    ship.x.acceleration = Math.cos(deg2rad(ship.rotation.value)) * shipInputs.forward * 300;
+    ship.y.acceleration = Math.sin(deg2rad(ship.rotation.value)) * shipInputs.forward * 300;
+    ship.rotation.acceleration = shipInputs.turnRight * 1400;
 
     // Friction
-    tank.x.speed *= 0.9;
-    tank.y.speed *= 0.9;
-    tank.rotation.speed *= 0.9;
-    tank.towerRotation.speed *= 0.6;
+    ship.x.speed *= 0.99;
+    ship.y.speed *= 0.99;
+    ship.rotation.speed *= 0.9;
 
-    tank.x.step(delta);
-    tank.y.step(delta);
-    tank.rotation.step(delta);
-    tank.towerRotation.step(delta);
+    ship.x.step(delta);
+    ship.y.step(delta);
+    ship.rotation.step(delta);
 }
 
-export const placeTanksInAGrid = (canvas) => {
+export const placeTanksInAGrid = (canvas, width = 10, height = 8) => {
     const tanks = [];
     const screenWidth = Number.parseInt(canvas.width);
     const screenHeight = Number.parseInt(canvas.height);
-    for (let x = 0; x < 10; x++) {
-        for (let y = 0; y < 8; y++) {
+    for (let x = 0; x < width; x++) {
+        for (let y = 0; y < height; y++) {
             const state = {
                 color: `#${randomItem('5,7,9,a,c,d,d,e,f'.split(','))}${randomItem('5,7,9,a,c,d,d,e,f'.split(','))}${randomItem('5,7,9,a,c,d,d,e,f'.split(','))}`,
                 x: new Acceleratable(randomInt(0, screenWidth)),

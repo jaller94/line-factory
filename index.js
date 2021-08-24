@@ -41,15 +41,22 @@ function step(timestamp) {
     
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    
+    ctx.save();
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.scale(2, 2);
+    ctx.translate(-playerTank.x.value, -playerTank.y.value);
+
     for (const tank of tanks) {
         const inputs = tankAIDriver(tank.state, tank.desiredState);
         stepTank(tank.state, inputs, delta);
         drawTank(ctx, tank.state);
     }
 
-    // stepTank(playerTank, tankInputs, delta);
-    // drawTank(ctx, playerTank);
+    stepTank(playerTank, tankInputs, delta);
+    drawTank(ctx, playerTank);
+
+    ctx.restore();
+
     
     // ctx.fillStyle = 'white';
     // ctx.fillText(`${elapsed.toFixed(0)} ${previousTimeStamp.toFixed(0)}`, 0, 10);
