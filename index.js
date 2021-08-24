@@ -1,4 +1,5 @@
 import { Acceleratable, limit } from './helper.js';
+import { draw as drawAsteroid, step as stepAsteroid, placeRandomly as placeAsteroidsRandomly } from './asteroid.js';
 import { drawTank, tankAIDriver, stepTank, placeTanksInAGrid } from './tank.js';
 
 const canvas = document.getElementById('screen');
@@ -6,11 +7,19 @@ const ctx = canvas.getContext('2d', {alpha : false});
 
 let start, previousTimeStamp;
 
-// ctx.strokeStyle = 
 ctx.lineWidth = 0.5;
 
-const x = 50;
-const y = 50;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    // if (canvas.width != canvas.clientWidth || canvas.height != canvas.clientHeight) {
+    //     canvas.width = canvas.clientWidth;
+    //     canvas.height = canvas.clientHeight;
+    // }
+});
 
 const playerTank = {
     color: '#fff',
@@ -28,6 +37,10 @@ const tankInputs = {
 
 const tanks = [
     ...placeTanksInAGrid(canvas),
+];
+
+const asteroids = [
+    ...placeAsteroidsRandomly(canvas, 100),
 ];
 
 function step(timestamp) {
@@ -50,6 +63,11 @@ function step(timestamp) {
         const inputs = tankAIDriver(tank.state, tank.desiredState);
         stepTank(tank.state, inputs, delta);
         drawTank(ctx, tank.state);
+    }
+
+    for (const tank of asteroids) {
+        stepAsteroid(tank.state, {}, delta);
+        drawAsteroid(ctx, tank.state);
     }
 
     stepTank(playerTank, tankInputs, delta);
