@@ -113,23 +113,33 @@ window.addEventListener('keyup', event => {
     }
 });
 
+const pressedPointers = {};
+
 document.getElementById('l').addEventListener('pointerdown', event => {
     tankInputs.turnRight = -1;
-});
-document.getElementById('l').addEventListener('pointerup', event => {
-    tankInputs.turnRight = 0;
+    event.target.classList.add('pressed');
+    pressedPointers[event.pointerId] = 'l';
 });
 document.getElementById('r').addEventListener('pointerdown', event => {
     tankInputs.turnRight = 1;
-});
-document.getElementById('r').addEventListener('pointerup', event => {
-    tankInputs.turnRight = 0;
+    event.target.classList.add('pressed');
+    pressedPointers[event.pointerId] = 'r';
 });
 document.getElementById('f').addEventListener('pointerdown', event => {
     tankInputs.forward = 1;
+    event.target.classList.add('pressed');
+    pressedPointers[event.pointerId] = 'f';
 });
-document.getElementById('f').addEventListener('pointerup', event => {
-    tankInputs.forward = 0;
+window.addEventListener('pointerup', event => {
+    console.log(event.pointerId);
+    const button = pressedPointers[event.pointerId];
+    if (!button) return;
+    if (button === 'l' || button === 'r') {
+        tankInputs.turnRight = 0;
+    } else if (button === 'f') {
+        tankInputs.forward = 0;
+    }
+    document.getElementById(button).classList.remove('pressed');
 });
 
 let controlsOn = false;
