@@ -84,44 +84,58 @@ function step(timestamp) {
 }
 
 window.addEventListener('keydown', event => {
-    if (event.key === 'w') {
+    if (event.key === 'ArrowUp') {
         tankInputs.forward = 1;
     }
-    if (event.key === 's') {
+    if (event.key === 'ArrowDown') {
         tankInputs.forward = -1;
     }
-    if (event.key === 'd') {
+    if (event.key === 'ArrowRight') {
         tankInputs.turnRight = 1;
     }
-    if (event.key === 'a') {
-        tankInputs.turnRight = -1;
-    }
-    if (event.key === 'ArrowRight') {
-        tankInputs.turnTowerRight = 1;
-    }
     if (event.key === 'ArrowLeft') {
-        tankInputs.turnTowerRight = -1;
+        tankInputs.turnRight = -1;
     }
 });
 
 window.addEventListener('keyup', event => {
-    if (event.key === 'w') {
+    if (event.key === 'ArrowUp') {
         tankInputs.forward = 0;
     }
-    if (event.key === 's') {
+    if (event.key === 'ArrowDown') {
         tankInputs.forward = 0;
-    }
-    if (event.key === 'd') {
-        tankInputs.turnRight = 0;
-    }
-    if (event.key === 'a') {
-        tankInputs.turnRight = 0;
     }
     if (event.key === 'ArrowRight') {
-        tankInputs.turnTowerRight = 0;
+        tankInputs.turnRight = 0;
     }
     if (event.key === 'ArrowLeft') {
-        tankInputs.turnTowerRight = 0;
+        tankInputs.turnRight = 0;
+    }
+});
+
+document.getElementById('l').addEventListener('mousedown', event => {
+    tankInputs.turnRight = -1;
+});
+document.getElementById('l').addEventListener('mouseup', event => {
+    tankInputs.turnRight = 0;
+});
+document.getElementById('r').addEventListener('mousedown', event => {
+    tankInputs.turnRight = 1;
+});
+document.getElementById('r').addEventListener('mouseup', event => {
+    tankInputs.turnRight = 0;
+});
+document.getElementById('f').addEventListener('mousedown', event => {
+    tankInputs.forward = 1;
+});
+document.getElementById('f').addEventListener('mouseup', event => {
+    tankInputs.forward = 0;
+});
+
+let controlsOn = false;
+window.addEventListener('mouseover', event => {
+    if (!controlsOn) {
+        document.getElementById('controls').classList.remove('hide');
     }
 });
 
