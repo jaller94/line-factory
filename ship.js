@@ -52,7 +52,7 @@ export const tankAIDriver = (tank, desiredState) => {
     return inputs;
 };
 
-export const drawTank = (ctx, ship) => {
+export const draw = (ctx, ship) => {
     ctx.save();
     ctx.strokeStyle = ship.color;
     ctx.translate(ship.x.value, ship.y.value);
@@ -68,7 +68,7 @@ export const drawTank = (ctx, ship) => {
     ctx.restore();
 }
 
-export const stepTank = (ship, shipInputs, delta) => {
+export const step = (ship, shipInputs, delta) => {
     ship.x.acceleration = Math.cos(deg2rad(ship.rotation.value)) * shipInputs.forward * 300;
     ship.y.acceleration = Math.sin(deg2rad(ship.rotation.value)) * shipInputs.forward * 300;
     ship.rotation.acceleration = shipInputs.turnRight * 1400;

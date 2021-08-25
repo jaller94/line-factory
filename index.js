@@ -1,6 +1,7 @@
 import { Acceleratable, limit } from './helper.js';
 import { draw as drawAsteroid, step as stepAsteroid, placeRandomly as placeAsteroidsRandomly } from './asteroid.js';
-import { drawTank, tankAIDriver, stepTank, placeTanksInAGrid } from './tank.js';
+import { draw as drawShip, tankAIDriver, step as stepShip, placeTanksInAGrid } from './ship.js';
+import { draw as drawShot, step as stepShot, shoot } from './shot.js';
 
 const canvas = document.getElementById('screen');
 const ctx = canvas.getContext('2d', {alpha : false});
@@ -41,6 +42,12 @@ const asteroids = [
     ...placeAsteroidsRandomly(canvas, 100),
 ];
 
+let shots = [];
+
+setInterval(() => {
+    shots = shots.filter(shot => shot.active);
+}, 20000);
+
 function step(timestamp) {
     if (start === undefined) {
         start = timestamp;
@@ -60,17 +67,23 @@ function step(timestamp) {
 
     for (const tank of tanks) {
         const inputs = tankAIDriver(tank.state, tank.desiredState);
-        stepTank(tank.state, inputs, delta);
-        drawTank(ctx, tank.state);
+        stepShip(tank.state, inputs, delta);
+        drawShip(ctx, tank.state);
     }
 
-    for (const tank of asteroids) {
-        stepAsteroid(tank.state, {}, delta);
-        drawAsteroid(ctx, tank.state);
+    for (const asteroid of asteroids) {
+        stepAsteroid(asteroid.state, {}, delta);
+        drawAsteroid(ctx, asteroid.state);
     }
 
-    stepTank(playerTank, tankInputs, delta);
-    drawTank(ctx, playerTank);
+    for (const shot of shots) {
+        if (!shot.active) continue;
+        stepShot(shot.state, {}, delta);
+        drawShot(ctx, shot.state);
+    }
+
+    stepShip(playerTank, tankInputs, delta);
+    drawShip(ctx, playerTank);
 
     ctx.restore();
 
@@ -94,6 +107,9 @@ window.addEventListener('keydown', event => {
     if (event.key === 'ArrowLeft') {
         tankInputs.turnRight = -1;
     }
+    if (event.key === 'Space' || event.key === ' ') {
+        shots.push(shoot(playerTank));
+    }
 });
 
 window.addEventListener('keyup', event => {
@@ -114,16 +130,22 @@ window.addEventListener('keyup', event => {
 const pressedPointers = {};
 
 document.getElementById('l').addEventListener('pointerdown', event => {
+    event.preventDefault();
+    event.stopPropagation();
     tankInputs.turnRight = -1;
     event.target.classList.add('pressed');
     pressedPointers[event.pointerId] = 'l';
 });
 document.getElementById('r').addEventListener('pointerdown', event => {
+    event.preventDefault();
+    event.stopPropagation();
     tankInputs.turnRight = 1;
     event.target.classList.add('pressed');
     pressedPointers[event.pointerId] = 'r';
 });
 document.getElementById('f').addEventListener('pointerdown', event => {
+    event.preventDefault();
+    event.stopPropagation();
     tankInputs.forward = 1;
     event.target.classList.add('pressed');
     pressedPointers[event.pointerId] = 'f';
@@ -139,6 +161,14 @@ window.addEventListener('pointerup', event => {
     }
     document.getElementById(button).classList.remove('pressed');
 });
+
+// TODO: Handle zoom. But for now we just disable it.
+document.addEventListener('wheel', event => {
+        if (event.ctrlKey) {
+            event.preventDefault();
+        }
+    }, { passive: false }
+);
 
 let controlsOn = false;
 window.addEventListener('pointerover', event => {
