@@ -113,27 +113,27 @@ window.addEventListener('keyup', event => {
     }
 });
 
-document.getElementById('l').addEventListener('mousedown', event => {
+document.getElementById('l').addEventListener('pointerdown', event => {
     tankInputs.turnRight = -1;
 });
-document.getElementById('l').addEventListener('mouseup', event => {
+document.getElementById('l').addEventListener('pointerup', event => {
     tankInputs.turnRight = 0;
 });
-document.getElementById('r').addEventListener('mousedown', event => {
+document.getElementById('r').addEventListener('pointerdown', event => {
     tankInputs.turnRight = 1;
 });
-document.getElementById('r').addEventListener('mouseup', event => {
+document.getElementById('r').addEventListener('pointerup', event => {
     tankInputs.turnRight = 0;
 });
-document.getElementById('f').addEventListener('mousedown', event => {
+document.getElementById('f').addEventListener('pointerdown', event => {
     tankInputs.forward = 1;
 });
-document.getElementById('f').addEventListener('mouseup', event => {
+document.getElementById('f').addEventListener('pointerup', event => {
     tankInputs.forward = 0;
 });
 
 let controlsOn = false;
-window.addEventListener('mouseover', event => {
+window.addEventListener('pointerover', event => {
     if (!controlsOn) {
         document.getElementById('controls').classList.remove('hide');
     }
