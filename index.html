@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>Lines</title>
     <style>
         html, body {
@@ -13,6 +13,7 @@
 
         canvas {
             outline: black 3px solid;
+            position: absolute;
             width: 100%;
             height: 100%;
         }
@@ -24,9 +25,7 @@
             gap: 2em;
             left: 0;
             width: 100%;
-            transition-property: opacity;
-            transition: ease;
-            transition-duration: 2s;
+            transition: opacity ease 2s;
         }
 
         .hide {

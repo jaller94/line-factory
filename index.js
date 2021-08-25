@@ -9,16 +9,14 @@ let start, previousTimeStamp;
 
 ctx.lineWidth = 0.5;
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+canvas.width = canvas.clientWidth;
+canvas.height = canvas.clientHeight;
 
 window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    // if (canvas.width != canvas.clientWidth || canvas.height != canvas.clientHeight) {
-    //     canvas.width = canvas.clientWidth;
-    //     canvas.height = canvas.clientHeight;
-    // }
+    if (canvas.width != canvas.clientWidth || canvas.height != canvas.clientHeight) {
+        canvas.width = canvas.clientWidth;
+        canvas.height = canvas.clientHeight;
+    }
 });
 
 const playerTank = {
