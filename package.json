@@ -7,7 +7,7 @@
     "browserslist": "firefox 90, chrome 92",
     "scripts": {
         "start": "parcel src/index.html",
-        "build": "parcel build --no-source-maps src/index.html"
+        "build": "parcel build src/index.html"
     },
     "sourceMap": false,
     "devDependencies": {
