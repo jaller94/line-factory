@@ -1,0 +1,37 @@
+image: node:latest
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+  - node_modules/
+
+before_script:
+- npm ci
+
+build:
+  before_script:
+  - apt-get update
+  - apt-get install zip
+  - npm ci
+  script:
+  - npm run-script build -- --public-url ./ --no-source-maps --no-content-hash
+  - cd dist
+  - zip -9 game *.html *.js *.png
+  - cd -
+  - mv dist/game.zip ./
+  - echo 'file_size $(stat --printf="%s" game.zip)' > metrics.txt
+  #- test $(stat --printf="%s" game.zip) -lt 13312
+  artifacts:
+    paths:
+    - game.zip
+    reports:
+      metrics: metrics.txt
+
+pages:
+  script:
+  - npm run-script build -- -d public --public-url ./
+  artifacts:
+    paths:
+    - public
+  only:
+  - main

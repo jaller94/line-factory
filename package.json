@@ -1,0 +1,16 @@
+{
+    "name": "line-factory",
+    "private": true,
+    "version": "1.0.0",
+    "license": "MIT",
+    "source": "src/index.html",
+    "browserslist": "firefox 90, chrome 92",
+    "scripts": {
+        "start": "parcel src/index.html",
+        "build": "parcel build --no-source-maps src/index.html"
+    },
+    "sourceMap": false,
+    "devDependencies": {
+        "parcel": "latest"
+    }
+}
