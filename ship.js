@@ -1,6 +1,6 @@
 import { Acceleratable, deg2rad, limit, randomInt, randomItem, withinRange } from './helper.js';
 
-export const tankAIDriver = (tank, desiredState) => {
+export const AIDriver = (tank, desiredState) => {
     const inputs = {
         forward: 0,
         turnRight: 0,
@@ -83,7 +83,7 @@ export const step = (ship, shipInputs, delta) => {
     ship.rotation.step(delta);
 }
 
-export const placeTanksInAGrid = (canvas, width = 10, height = 8) => {
+export const placeInAGrid = (canvas, width = 10, height = 8) => {
     const tanks = [];
     const screenWidth = Number.parseInt(canvas.width);
     const screenHeight = Number.parseInt(canvas.height);
@@ -115,22 +115,20 @@ export const placeTanksInAGrid = (canvas, width = 10, height = 8) => {
     return tanks;
 }
 
-export const placeTanksRandomly = (canvas, amount) => {
+export const placeRandomly = (amount, x = 0, y = 0, width = 1024, height = 1024) => {
     const tanks = [];
-    const screenWidth = Number.parseInt(canvas.width);
-    const screenHeight = Number.parseInt(canvas.height);
     for (let i = 0; i < amount; i++) {
         const state = {
             color: `#${randomItem('5,7,9,a,c,d,d,e,f'.split(','))}${randomItem('5,7,9,a,c,d,d,e,f'.split(','))}${randomItem('5,7,9,a,c,d,d,e,f'.split(','))}`,
-            x: new Acceleratable(randomInt(0, screenWidth)),
-            y: new Acceleratable(randomInt(0, screenHeight)),
+            x: new Acceleratable(randomInt(x, x + width)),
+            y: new Acceleratable(randomInt(y, y + height)),
             rotation: new Acceleratable(0),
             towerRotation: new Acceleratable(0),
         };
         const desiredState = {
             ...state,
-            x: new Acceleratable(randomInt(0, screenWidth)),
-            y: new Acceleratable(randomInt(0, screenWidth)),
+            x: new Acceleratable(randomInt(x, x + width)),
+            y: new Acceleratable(randomInt(y, y + height)),
             rotation: new Acceleratable(randomInt(0, 359)),
             towerRotation: new Acceleratable(randomInt(0, 359)),
         };

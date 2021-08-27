@@ -5,7 +5,6 @@ export const draw = (ctx, ship) => {
     ctx.strokeStyle = ship.color;
     ctx.translate(ship.x.value, ship.y.value);
     ctx.rotate(deg2rad(ship.rotation.value));
-    // Base
     ctx.beginPath();
     for (let i = 0; i < 360; i += 40) {
         ctx.lineTo(Math.sin(deg2rad(i)) * 12 + limit(4 * Math.sin(ship.seed * i * 100), -3, 3), Math.cos(deg2rad(i)) * 12) + limit(4 * Math.sin(ship.seed * i * 234), -3, 3);
@@ -14,6 +13,25 @@ export const draw = (ctx, ship) => {
     ctx.lineTo(Math.sin(deg2rad(i)) * 12 + limit(Math.sin(ship.seed * i * 100), -1, 1), Math.cos(deg2rad(i)) * 12);
     ctx.stroke();
     ctx.restore();
+}
+
+export const drawAll = (ctx, ships) => {
+    ctx.strokeStyle = 'white';
+    ctx.beginPath();
+    for (const ship of ships) {
+        const { state } = ship;
+        ctx.save();
+        ctx.translate(state.x.value, state.y.value);
+        ctx.rotate(deg2rad(state.rotation.value));
+        ctx.moveTo(Math.sin(deg2rad(0)) * 12 + limit(Math.sin(0), -1, 1), Math.cos(deg2rad(0)) * 12);
+        for (let i = 40; i < 360; i += 40) {
+            ctx.lineTo(Math.sin(deg2rad(i)) * 12 + limit(4 * Math.sin(state.seed * i * 100), -3, 3), Math.cos(deg2rad(i)) * 12) + limit(4 * Math.sin(state.seed * i * 234), -3, 3);
+        }
+        const i = 0;
+        ctx.lineTo(Math.sin(deg2rad(i)) * 12 + limit(Math.sin(state.seed * i * 100), -1, 1), Math.cos(deg2rad(i)) * 12);
+        ctx.restore();
+    }
+    ctx.stroke();
 }
 
 export const step = (ship, shipInputs, delta) => {
@@ -54,15 +72,13 @@ export const placeInAGrid = (canvas, width = 10, height = 8) => {
     return tanks;
 }
 
-export const placeRandomly = (canvas, amount) => {
+export const placeRandomly = (amount, x = 0, y = 0, width = 1024, height = 1024) => {
     const tanks = [];
-    const screenWidth = Number.parseInt(canvas.width);
-    const screenHeight = Number.parseInt(canvas.height);
     for (let i = 0; i < amount; i++) {
         const state = {
             color: `#fff`,
-            x: new Acceleratable(randomInt(0, 700), randomInt(-7, 7)),
-            y: new Acceleratable(randomInt(0, 700), randomInt(-7, 7)),
+            x: new Acceleratable(randomInt(x * width, x * width + width), randomInt(-7, 7)),
+            y: new Acceleratable(randomInt(y * height, y * height + height, 700), randomInt(-7, 7)),
             rotation: new Acceleratable(randomInt(0, 359)),
             seed: Math.random(),
         };

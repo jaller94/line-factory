@@ -1,7 +1,17 @@
 import { Acceleratable, limit } from './helper.js';
-import { draw as drawAsteroid, step as stepAsteroid, placeRandomly as placeAsteroidsRandomly } from './asteroid.js';
-import { draw as drawShip, tankAIDriver, step as stepShip, placeTanksInAGrid } from './ship.js';
+import { draw as drawAsteroid, drawAll as drawAllAsteroids, step as stepAsteroid, placeRandomly as placeAsteroidsRandomly } from './asteroid.js';
+import { draw as drawShip, AIDriver as shipAIDriver, step as stepShip, placeInAGrid as placeTanksInAGrid } from './ship.js';
 import { draw as drawShot, step as stepShot, shoot } from './shot.js';
+
+const distance = (x1, y1, x2, y2) => {
+    const a = x1 - x2;
+    const b = y1 - y2;
+    return Math.sqrt(a * a + b * b);
+}
+
+const distanceOfActors = (actor1, actor2) => {
+    return distance(actor1.x.value, actor1.y.value, actor2.x.value, actor2.y.value);
+}
 
 const canvas = document.getElementById('screen');
 const ctx = canvas.getContext('2d', {alpha : false});
@@ -34,12 +44,15 @@ const tankInputs = {
     turnTowerRight: 0,
 };
 
-const tanks = [
+const ships = [
     ...placeTanksInAGrid(canvas),
 ];
 
-const asteroids = [
-    ...placeAsteroidsRandomly(canvas, 100),
+let asteroids = [
+    ...placeAsteroidsRandomly(100, 0, 0),
+    // ...placeAsteroidsRandomly(100, 1, 0),
+    // ...placeAsteroidsRandomly(100, 2, 0),
+    // ...placeAsteroidsRandomly(100, 2, 0),
 ];
 
 let shots = [];
@@ -48,14 +61,38 @@ setInterval(() => {
     shots = shots.filter(shot => shot.active);
 }, 20000);
 
+// setInterval(() => {
+//     asteroids = asteroids.filter(asteroid => distanceOfActors(playerTank, asteroid.state) < 2000);
+// }, 12000);
+
+let activeAsteroids = asteroids;
+setInterval(() => {
+    activeAsteroids = asteroids.filter(asteroid => distanceOfActors(playerTank, asteroid.state) < 1500);
+}, 1000);
+
 function step(timestamp) {
     if (start === undefined) {
         start = timestamp;
         previousTimeStamp = start;
     }
     // const elapsed = timestamp - start;
-    const delta = limit((timestamp - previousTimeStamp) / 1000, 0, 0.05);
+    const actualDelta = (timestamp - previousTimeStamp) / 1000;
+    const delta = limit(actualDelta, 0, 0.05);
     previousTimeStamp = timestamp;
+
+    for (const ship of ships) {
+        const inputs = shipAIDriver(ship.state, ship.desiredState);
+        stepShip(ship.state, inputs, delta);
+    }
+    for (const asteroid of activeAsteroids) {
+        stepAsteroid(asteroid.state, {}, delta);
+    }
+    for (const shot of shots) {
+        if (!shot.active) continue;
+        stepShot(shot.state, {}, delta);
+        drawShot(ctx, shot.state);
+    }
+    stepShip(playerTank, tankInputs, delta);
     
     ctx.fillStyle = '#black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -65,32 +102,24 @@ function step(timestamp) {
     ctx.scale(2, 2);
     ctx.translate(-playerTank.x.value, -playerTank.y.value);
 
-    for (const tank of tanks) {
-        const inputs = tankAIDriver(tank.state, tank.desiredState);
-        stepShip(tank.state, inputs, delta);
-        drawShip(ctx, tank.state);
+    for (const ship of ships) {
+        drawShip(ctx, ship.state);
     }
 
-    for (const asteroid of asteroids) {
-        stepAsteroid(asteroid.state, {}, delta);
-        drawAsteroid(ctx, asteroid.state);
-    }
-
+    drawAllAsteroids(ctx, activeAsteroids);
+    
     for (const shot of shots) {
-        if (!shot.active) continue;
-        stepShot(shot.state, {}, delta);
         drawShot(ctx, shot.state);
     }
 
-    stepShip(playerTank, tankInputs, delta);
     drawShip(ctx, playerTank);
 
     ctx.restore();
 
     
-    // ctx.fillStyle = 'white';
-    // ctx.fillText(`${elapsed.toFixed(0)} ${previousTimeStamp.toFixed(0)}`, 0, 10);
-    // ctx.fillStyle = 'black';
+    ctx.fillStyle = 'white';
+    ctx.fillText(`${actualDelta - delta}`, 0, 10);
+    ctx.fillStyle = 'black';
     window.requestAnimationFrame(step);
 }
 
@@ -127,8 +156,9 @@ window.addEventListener('keyup', event => {
     }
 });
 
-const pressedPointers = {};
 
+/*  START Mouse/Touch Controls */
+const pressedPointers = {};
 document.getElementById('l').addEventListener('pointerdown', event => {
     event.preventDefault();
     event.stopPropagation();
@@ -176,5 +206,6 @@ window.addEventListener('pointerover', event => {
         document.getElementById('controls').classList.remove('hide');
     }
 });
+/*  END Mouse/Touch Controls */
 
 window.requestAnimationFrame(step);
