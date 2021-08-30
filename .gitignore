@@ -2,4 +2,6 @@ node_modules
 
 # Parcel bundler
 dist
+public
 .cache
+.parcel-cache
