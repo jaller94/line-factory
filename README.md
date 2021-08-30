@@ -28,4 +28,4 @@ You can change the code in a text editor and reload the browser tab to play your
 ## Package the game
 The js13kgames rules allow a game to be minified and zipped before submission. The ZIP file must not be bigger than 13 kilobytes.
 
-To minimize the code, we use [Parcel](https://parceljs.org/) which is an NPM package. The ZIP archive can be built with just a few commands and we automatically run these step as described in `.gitlab-ci.yml`.
+To minimize the code, we use NPM and [Parcel](https://parceljs.org/). The ZIP archive can be built with just a few commands and we automatically run these steps as described in `.gitlab-ci.yml`.
