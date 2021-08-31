@@ -18,6 +18,20 @@ export const deg2rad = (deg) => {
     return (Math.PI / 180) * deg;
 }
 
+export const directionOfActor = (actor1, actor2) => {
+    return Math.atan2(actor2.y.value - actor1.y.value, actor2.x.value - actor1.x.value) / Math.PI * 180 + 90;
+};
+
+export const distance = (x1, y1, x2, y2) => {
+    const a = x1 - x2;
+    const b = y1 - y2;
+    return Math.sqrt(a * a + b * b);
+}
+
+export const distanceOfActors = (actor1, actor2) => {
+    return distance(actor1.x.value, actor1.y.value, actor2.x.value, actor2.y.value);
+}
+
 export const limit = (value, min, max) => {
     return Math.max(min, Math.min(max, value));
 }

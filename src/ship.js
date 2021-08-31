@@ -1,4 +1,4 @@
-import { Acceleratable, deg2rad, limit, randomInt, randomItem, withinRange } from './helper.js';
+import { Acceleratable, deg2rad, directionOfActor, distanceOfActors, limit, randomInt, randomItem, withinRange } from './helper.js';
 
 export const AIDriver = (tank, desiredState) => {
     const inputs = {
@@ -68,7 +68,7 @@ export const draw = (ctx, ship) => {
     ctx.restore();
 }
 
-export const step = (ship, shipInputs, delta) => {
+export const step = (ship, shipInputs, delta, world = {}) => {
     ship.x.acceleration = Math.cos(deg2rad(ship.rotation.value)) * shipInputs.forward * 300;
     ship.y.acceleration = Math.sin(deg2rad(ship.rotation.value)) * shipInputs.forward * 300;
     ship.rotation.acceleration = shipInputs.turnRight * 1400;
@@ -77,6 +77,15 @@ export const step = (ship, shipInputs, delta) => {
     ship.x.speed *= 0.99;
     ship.y.speed *= 0.99;
     ship.rotation.speed *= 0.9;
+
+    for(const planet of (world.planets ?? [])) {
+        const distance = distanceOfActors(ship, planet.state);
+        const drag = -(planet.state.mass) / Math.pow(distance, 2);
+        const direction = directionOfActor(ship, planet.state);
+        // console.debug(distance, drag, direction);
+        ship.x.acceleration -= Math.sin(deg2rad(direction)) * drag * delta;
+        ship.y.acceleration += Math.cos(deg2rad(direction)) * drag * delta;
+    }
 
     ship.x.step(delta);
     ship.y.step(delta);

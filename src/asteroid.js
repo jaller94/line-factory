@@ -6,29 +6,29 @@ export const draw = (ctx, ship) => {
     ctx.translate(ship.x.value, ship.y.value);
     ctx.rotate(deg2rad(ship.rotation.value));
     ctx.beginPath();
-    for (let i = 0; i < 360; i += 40) {
-        ctx.lineTo(Math.sin(deg2rad(i)) * 12 + limit(4 * Math.sin(ship.seed * i * 100), -3, 3), Math.cos(deg2rad(i)) * 12) + limit(4 * Math.sin(ship.seed * i * 234), -3, 3);
+    for (let i = 0; i <= 360; i += 40) {
+        ctx.lineTo(Math.sin(deg2rad(i)) * 12 + limit(4 * Math.sin((ship.seed + i) * 100), -3, 3), Math.cos(deg2rad(i)) * 12) + limit(4 * Math.sin((ship.seed + i) * 234), -3, 3);
     }
-    const i = 0;
-    ctx.lineTo(Math.sin(deg2rad(i)) * 12 + limit(Math.sin(ship.seed * i * 100), -1, 1), Math.cos(deg2rad(i)) * 12);
+    ctx.closePath()
     ctx.stroke();
     ctx.restore();
 }
 
-export const drawAll = (ctx, ships) => {
+export const drawAll = (ctx, asteroids) => {
     ctx.strokeStyle = 'white';
     ctx.beginPath();
-    for (const ship of ships) {
-        const { state } = ship;
+    for (const asteroid of asteroids) {
+        const { state } = asteroid;
         ctx.save();
         ctx.translate(state.x.value, state.y.value);
         ctx.rotate(deg2rad(state.rotation.value));
-        ctx.moveTo(Math.sin(deg2rad(0)) * 12 + limit(Math.sin(0), -1, 1), Math.cos(deg2rad(0)) * 12);
+        
+        ctx.moveTo(Math.sin(0) * 12 + limit(4 * Math.sin(state.seed), -3, 3), Math.cos(0) * 12);
         for (let i = 40; i < 360; i += 40) {
-            ctx.lineTo(Math.sin(deg2rad(i)) * 12 + limit(4 * Math.sin(state.seed * i * 100), -3, 3), Math.cos(deg2rad(i)) * 12) + limit(4 * Math.sin(state.seed * i * 234), -3, 3);
+            ctx.lineTo(Math.sin(deg2rad(i)) * 12 + limit(4 * Math.sin(state.seed + i * state.seed * 1.2321), -3, 3), Math.cos(deg2rad(i)) * 12) + limit(4 * Math.sin(state.seed + i * state.seed * 1.523), -3, 3);
         }
-        const i = 0;
-        ctx.lineTo(Math.sin(deg2rad(i)) * 12 + limit(Math.sin(state.seed * i * 100), -1, 1), Math.cos(deg2rad(i)) * 12);
+        ctx.lineTo(Math.sin(0) * 12 + limit(4 * Math.sin(state.seed), -3, 3), Math.cos(0) * 12);
+
         ctx.restore();
     }
     ctx.stroke();
@@ -80,7 +80,7 @@ export const placeRandomly = (amount, x = 0, y = 0, width = 1024, height = 1024)
             x: new Acceleratable(randomInt(x * width, x * width + width), randomInt(-7, 7)),
             y: new Acceleratable(randomInt(y * height, y * height + height, 700), randomInt(-7, 7)),
             rotation: new Acceleratable(randomInt(0, 359)),
-            seed: Math.random(),
+            seed: Math.random() * 1000,
         };
         tanks.push({
             state,

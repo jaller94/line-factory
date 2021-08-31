@@ -1,17 +1,8 @@
-import { Acceleratable, limit } from './helper.js';
-import { draw as drawAsteroid, drawAll as drawAllAsteroids, step as stepAsteroid, placeRandomly as placeAsteroidsRandomly } from './asteroid.js';
+import { Acceleratable, distanceOfActors, limit } from './helper.js';
+import { drawAll as drawAllAsteroids, step as stepAsteroid, placeRandomly as placeAsteroidsRandomly } from './asteroid.js';
+import { draw as drawPlanet, step as stepPlanet, place as placePlanets } from './planet.js';
 import { draw as drawShip, AIDriver as shipAIDriver, step as stepShip, placeInAGrid as placeTanksInAGrid } from './ship.js';
 import { draw as drawShot, step as stepShot, shoot } from './shot.js';
-
-const distance = (x1, y1, x2, y2) => {
-    const a = x1 - x2;
-    const b = y1 - y2;
-    return Math.sqrt(a * a + b * b);
-}
-
-const distanceOfActors = (actor1, actor2) => {
-    return distance(actor1.x.value, actor1.y.value, actor2.x.value, actor2.y.value);
-}
 
 const canvas = document.getElementById('screen');
 const ctx = canvas.getContext('2d', {alpha : false});
@@ -30,7 +21,7 @@ window.addEventListener('resize', () => {
     }
 });
 
-const playerTank = {
+const playerShip = {
     color: '#fff',
     x: new Acceleratable(50),
     y: new Acceleratable(50),
@@ -38,36 +29,39 @@ const playerTank = {
     towerRotation: new Acceleratable(0),
 };
 
-const tankInputs = {
+const shipInputs = {
     forward: 0,
     turnRight: 0,
     turnTowerRight: 0,
 };
 
-const ships = [
-    ...placeTanksInAGrid(canvas),
-];
-
-let asteroids = [
-    ...placeAsteroidsRandomly(100, 0, 0),
-    // ...placeAsteroidsRandomly(100, 1, 0),
-    // ...placeAsteroidsRandomly(100, 2, 0),
-    // ...placeAsteroidsRandomly(100, 2, 0),
-];
-
-let shots = [];
+const world = {
+    ships: [
+        ...placeTanksInAGrid(canvas),
+    ],
+    asteroids: [
+        ...placeAsteroidsRandomly(100, 0, 0),
+        // ...placeAsteroidsRandomly(100, 1, 0),
+        // ...placeAsteroidsRandomly(100, 2, 0),
+        // ...placeAsteroidsRandomly(100, 2, 0),
+    ],
+    planets: [
+        ...placePlanets(1, 4, 0),
+    ],
+    shots: [],
+};
 
 setInterval(() => {
-    shots = shots.filter(shot => shot.active);
+    world.shots = world.shots.filter(shot => shot.active);
 }, 20000);
 
 // setInterval(() => {
-//     asteroids = asteroids.filter(asteroid => distanceOfActors(playerTank, asteroid.state) < 2000);
+//     asteroids = asteroids.filter(asteroid => distanceOfActors(playerShip, asteroid.state) < 2000);
 // }, 12000);
 
-let activeAsteroids = asteroids;
+let activeAsteroids = world.asteroids;
 setInterval(() => {
-    activeAsteroids = asteroids.filter(asteroid => distanceOfActors(playerTank, asteroid.state) < 1500);
+    activeAsteroids = world.asteroids.filter(asteroid => distanceOfActors(playerShip, asteroid.state) < 1500);
 }, 1000);
 
 function step(timestamp) {
@@ -80,19 +74,22 @@ function step(timestamp) {
     const delta = limit(actualDelta, 0, 0.05);
     previousTimeStamp = timestamp;
 
-    for (const ship of ships) {
+    for (const ship of world.ships) {
         const inputs = shipAIDriver(ship.state, ship.desiredState);
         stepShip(ship.state, inputs, delta);
     }
     for (const asteroid of activeAsteroids) {
         stepAsteroid(asteroid.state, {}, delta);
     }
-    for (const shot of shots) {
+    for (const planet of world.planets) {
+        stepPlanet(planet.state, {}, delta);
+    }
+    for (const shot of world.shots) {
         if (!shot.active) continue;
         stepShot(shot.state, {}, delta);
         drawShot(ctx, shot.state);
     }
-    stepShip(playerTank, tankInputs, delta);
+    stepShip(playerShip, shipInputs, delta, world);
     
     ctx.fillStyle = '#black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -100,59 +97,62 @@ function step(timestamp) {
     ctx.save();
     ctx.translate(canvas.width / 2, canvas.height / 2);
     ctx.scale(2, 2);
-    ctx.translate(-playerTank.x.value, -playerTank.y.value);
+    ctx.translate(-playerShip.x.value, -playerShip.y.value);
 
-    for (const ship of ships) {
+    for (const ship of world.ships) {
         drawShip(ctx, ship.state);
     }
 
     drawAllAsteroids(ctx, activeAsteroids);
     
-    for (const shot of shots) {
+    for (const planet of world.planets) {
+        drawPlanet(ctx, planet.state);
+    }
+
+    for (const shot of world.shots) {
         drawShot(ctx, shot.state);
     }
 
-    drawShip(ctx, playerTank);
+    drawShip(ctx, playerShip);
 
     ctx.restore();
 
-    
-    ctx.fillStyle = 'white';
-    ctx.fillText(`${actualDelta - delta}`, 0, 10);
-    ctx.fillStyle = 'black';
+    // ctx.fillStyle = 'white';
+    // ctx.fillText(`${actualDelta - delta}`, 0, 10);
+    // ctx.fillStyle = 'black';
     window.requestAnimationFrame(step);
 }
 
 window.addEventListener('keydown', event => {
     if (event.key === 'ArrowUp') {
-        tankInputs.forward = 1;
+        shipInputs.forward = 1;
     }
     if (event.key === 'ArrowDown') {
-        tankInputs.forward = -1;
+        shipInputs.forward = -1;
     }
     if (event.key === 'ArrowRight') {
-        tankInputs.turnRight = 1;
+        shipInputs.turnRight = 1;
     }
     if (event.key === 'ArrowLeft') {
-        tankInputs.turnRight = -1;
+        shipInputs.turnRight = -1;
     }
     if (event.key === 'Space' || event.key === ' ') {
-        shots.push(shoot(playerTank));
+        shots.push(shoot(playerShip));
     }
 });
 
 window.addEventListener('keyup', event => {
     if (event.key === 'ArrowUp') {
-        tankInputs.forward = 0;
+        shipInputs.forward = 0;
     }
     if (event.key === 'ArrowDown') {
-        tankInputs.forward = 0;
+        shipInputs.forward = 0;
     }
     if (event.key === 'ArrowRight') {
-        tankInputs.turnRight = 0;
+        shipInputs.turnRight = 0;
     }
     if (event.key === 'ArrowLeft') {
-        tankInputs.turnRight = 0;
+        shipInputs.turnRight = 0;
     }
 });
 
@@ -162,21 +162,21 @@ const pressedPointers = {};
 document.getElementById('l').addEventListener('pointerdown', event => {
     event.preventDefault();
     event.stopPropagation();
-    tankInputs.turnRight = -1;
+    shipInputs.turnRight = -1;
     event.target.classList.add('pressed');
     pressedPointers[event.pointerId] = 'l';
 });
 document.getElementById('r').addEventListener('pointerdown', event => {
     event.preventDefault();
     event.stopPropagation();
-    tankInputs.turnRight = 1;
+    shipInputs.turnRight = 1;
     event.target.classList.add('pressed');
     pressedPointers[event.pointerId] = 'r';
 });
 document.getElementById('f').addEventListener('pointerdown', event => {
     event.preventDefault();
     event.stopPropagation();
-    tankInputs.forward = 1;
+    shipInputs.forward = 1;
     event.target.classList.add('pressed');
     pressedPointers[event.pointerId] = 'f';
 });
@@ -185,9 +185,9 @@ window.addEventListener('pointerup', event => {
     const button = pressedPointers[event.pointerId];
     if (!button) return;
     if (button === 'l' || button === 'r') {
-        tankInputs.turnRight = 0;
+        shipInputs.turnRight = 0;
     } else if (button === 'f') {
-        tankInputs.forward = 0;
+        shipInputs.forward = 0;
     }
     document.getElementById(button).classList.remove('pressed');
 });
