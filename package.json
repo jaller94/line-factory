@@ -5,12 +5,15 @@
     "license": "MIT",
     "source": "src/index.html",
     "browserslist": "firefox 90, chrome 92",
+    "type": "module",
     "scripts": {
         "start": "parcel src/index.html",
-        "build": "parcel build src/index.html"
+        "build": "parcel build src/index.html",
+        "test": "NODE_OPTIONS=--experimental-vm-modules jest"
     },
     "sourceMap": false,
     "devDependencies": {
+        "jest": "^27.1.0",
         "parcel": "latest"
     }
 }
