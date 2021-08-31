@@ -51,14 +51,12 @@ export const placeInAGrid = (canvas, width = 10, height = 8) => {
                 x: new Acceleratable(randomInt(0, screenWidth)),
                 y: new Acceleratable(randomInt(0, screenHeight)),
                 rotation: new Acceleratable(randomInt(0, 360)),
-                towerRotation: new Acceleratable(randomInt(0, 360)),
             };
             const desiredState = {
                 ...state,
                 x: new Acceleratable(x * screenWidth / 10 + 32),
                 y: new Acceleratable(y * screenHeight / 8 + 32),
                 rotation: new Acceleratable(-90),
-                towerRotation: new Acceleratable(0),
             };
             const color = `#${'5,7,9,a,c,d,d,e,f'.split(',')[Math.floor(desiredState.x.value / (screenWidth / 8))]}${'6,7,8,9,b,e,b,8,6'.split(',')[Math.floor(desiredState.y.value / (screenHeight / 9))]}${'5,6,7,8,9,a,b,c,d'.split(',')[Math.floor(desiredState.y.value / (screenHeight / 9))]}`;
             state.color = color;

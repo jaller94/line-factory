@@ -1,10 +1,11 @@
 import { Acceleratable, deg2rad, directionOfActor, distanceOfActors, limit, randomInt, randomItem, withinRange } from './helper.js';
+import { shoot } from './shot.js';
 
 export const AIDriver = (tank, desiredState) => {
     const inputs = {
         forward: 0,
+        shooting: false,
         turnRight: 0,
-        turnTowerRight: 0,
     };
     // Do we need to drive to a different location?
     if (!withinRange(tank.x.value, desiredState.x.value, 3) || !withinRange(tank.y.value, desiredState.y.value, 3)) {
@@ -41,13 +42,6 @@ export const AIDriver = (tank, desiredState) => {
     if (withinRange(inputs.forward, 0, 0.01) && !withinRange(tank.x.value, desiredState.x.value, 25) && !withinRange(tank.y.value, desiredState.y.value, 25)) {
         // Langsame Geschwindigkeit, aber wir sind nicht da
         inputs.turnRight = 1;
-    }
-    // Do we need to rotate the tower?
-    const towerRotationDiff = ((tank.towerRotation.value - desiredState.towerRotation.value) % 360 + 360) % 360;
-    if (towerRotationDiff > 180) {
-        inputs.turnTowerRight = 1;
-    } else if (towerRotationDiff < 180) {
-        inputs.turnTowerRight = -1;
     }
     return inputs;
 };
@@ -90,6 +84,13 @@ export const step = (ship, shipInputs, delta, world = {}) => {
     ship.x.step(delta);
     ship.y.step(delta);
     ship.rotation.step(delta);
+
+    ship.lastShot += delta;
+
+    if (shipInputs.shooting && ship.lastShot > 0.4) {
+        world.shots.push(shoot(ship));
+        ship.lastShot = 0;
+    }
 }
 
 export const placeInAGrid = (canvas, width = 10, height = 8) => {
@@ -103,14 +104,13 @@ export const placeInAGrid = (canvas, width = 10, height = 8) => {
                 x: new Acceleratable(randomInt(0, screenWidth)),
                 y: new Acceleratable(randomInt(0, screenHeight)),
                 rotation: new Acceleratable(randomInt(0, 360)),
-                towerRotation: new Acceleratable(randomInt(0, 360)),
+                lastShot: 1000,
             };
             const desiredState = {
                 ...state,
                 x: new Acceleratable(x * screenWidth / 10 + 32),
                 y: new Acceleratable(y * screenHeight / 8 + 32),
                 rotation: new Acceleratable(-90),
-                towerRotation: new Acceleratable(0),
             };
             const color = `#${'5,7,9,a,c,d,d,e,f'.split(',')[Math.floor(desiredState.x.value / (screenWidth / 8))]}${'6,7,8,9,b,e,b,8,6'.split(',')[Math.floor(desiredState.y.value / (screenHeight / 9))]}${'5,6,7,8,9,a,b,c,d'.split(',')[Math.floor(desiredState.y.value / (screenHeight / 9))]}`;
             state.color = color;
@@ -132,14 +132,12 @@ export const placeRandomly = (amount, x = 0, y = 0, width = 1024, height = 1024)
             x: new Acceleratable(randomInt(x, x + width)),
             y: new Acceleratable(randomInt(y, y + height)),
             rotation: new Acceleratable(0),
-            towerRotation: new Acceleratable(0),
         };
         const desiredState = {
             ...state,
             x: new Acceleratable(randomInt(x, x + width)),
             y: new Acceleratable(randomInt(y, y + height)),
             rotation: new Acceleratable(randomInt(0, 359)),
-            towerRotation: new Acceleratable(randomInt(0, 359)),
         };
         const color = `#${'5,7,9,a,c,d,d,e,f'.split(',')[Math.floor(desiredState.x.value / (screenWidth / 8))]}${'6,7,8,9,b,e,b,8,6'.split(',')[Math.floor(desiredState.y.value / (screenHeight / 9))]}${'5,6,7,8,9,a,b,c,d'.split(',')[Math.floor(desiredState.y.value / (screenHeight / 9))]}`;
         state.color = color;

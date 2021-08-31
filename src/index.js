@@ -1,8 +1,8 @@
 import { Acceleratable, distanceOfActors, limit } from './helper.js';
 import { drawAll as drawAllAsteroids, step as stepAsteroid, placeRandomly as placeAsteroidsRandomly } from './asteroid.js';
-import { draw as drawPlanet, step as stepPlanet, place as placePlanets } from './planet.js';
+import { draw as drawPlanet, step as stepPlanet, place as placePlanet } from './planet.js';
 import { draw as drawShip, AIDriver as shipAIDriver, step as stepShip, placeInAGrid as placeTanksInAGrid } from './ship.js';
-import { draw as drawShot, step as stepShot, shoot } from './shot.js';
+import { draw as drawShot, step as stepShot } from './shot.js';
 
 const canvas = document.getElementById('screen');
 const ctx = canvas.getContext('2d', {alpha : false});
@@ -26,13 +26,13 @@ const playerShip = {
     x: new Acceleratable(50),
     y: new Acceleratable(50),
     rotation: new Acceleratable(0),
-    towerRotation: new Acceleratable(0),
+    lastShot: 1000,
 };
 
 const shipInputs = {
     forward: 0,
     turnRight: 0,
-    turnTowerRight: 0,
+    shooting: false,
 };
 
 const world = {
@@ -46,7 +46,7 @@ const world = {
         // ...placeAsteroidsRandomly(100, 2, 0),
     ],
     planets: [
-        ...placePlanets(1, 4, 0),
+        placePlanet(4000, 0),
     ],
     shots: [],
 };
@@ -76,7 +76,7 @@ function step(timestamp) {
 
     for (const ship of world.ships) {
         const inputs = shipAIDriver(ship.state, ship.desiredState);
-        stepShip(ship.state, inputs, delta);
+        stepShip(ship.state, inputs, delta, world);
     }
     for (const asteroid of activeAsteroids) {
         stepAsteroid(asteroid.state, {}, delta);
@@ -137,7 +137,7 @@ window.addEventListener('keydown', event => {
         shipInputs.turnRight = -1;
     }
     if (event.key === 'Space' || event.key === ' ') {
-        shots.push(shoot(playerShip));
+        shipInputs.shooting = true;
     }
 });
 
@@ -153,6 +153,9 @@ window.addEventListener('keyup', event => {
     }
     if (event.key === 'ArrowLeft') {
         shipInputs.turnRight = 0;
+    }
+    if (event.key === 'Space' || event.key === ' ') {
+        shipInputs.shooting = false;
     }
 });
 
@@ -180,14 +183,22 @@ document.getElementById('f').addEventListener('pointerdown', event => {
     event.target.classList.add('pressed');
     pressedPointers[event.pointerId] = 'f';
 });
+document.getElementById('w').addEventListener('pointerdown', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    shipInputs.shooting = true;
+    event.target.classList.add('pressed');
+    pressedPointers[event.pointerId] = 'w';
+});
 window.addEventListener('pointerup', event => {
-    console.log(event.pointerId);
     const button = pressedPointers[event.pointerId];
     if (!button) return;
     if (button === 'l' || button === 'r') {
         shipInputs.turnRight = 0;
     } else if (button === 'f') {
         shipInputs.forward = 0;
+    } else if (button === 'w') {
+        shipInputs.shooting = false;
     }
     document.getElementById(button).classList.remove('pressed');
 });
