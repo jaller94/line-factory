@@ -190,7 +190,7 @@ document.getElementById('w').addEventListener('pointerdown', event => {
     event.target.classList.add('pressed');
     pressedPointers[event.pointerId] = 'w';
 });
-window.addEventListener('pointerup', event => {
+const handlePointerUp = () => {
     const button = pressedPointers[event.pointerId];
     if (!button) return;
     if (button === 'l' || button === 'r') {
@@ -201,7 +201,9 @@ window.addEventListener('pointerup', event => {
         shipInputs.shooting = false;
     }
     document.getElementById(button).classList.remove('pressed');
-});
+};
+window.addEventListener('pointerup', handlePointerUp);
+window.addEventListener('pointercancel', handlePointerUp);
 
 // TODO: Handle zoom. But for now we just disable it.
 document.addEventListener('wheel', event => {
