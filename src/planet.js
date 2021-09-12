@@ -30,10 +30,10 @@ export const step = (state, delta) => {
     state.rotation.step(delta);
 }
 
-export const place = (x = 0, y = 0) => {
+export const place = (x = 0, y = 0, color = '#faa') => {
     return {
         state: {
-            color: `#faa`,
+            color,
             x: new Acceleratable(x),
             y: new Acceleratable(y),
             rotation: new Acceleratable(randomInt(0, 359)),

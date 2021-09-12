@@ -44,7 +44,10 @@ const world = {
         ...placeAsteroidsRandomly(50, 0, 0),
     ],
     planets: [
-        placePlanet(4000, 0),
+        placePlanet(4000, 0, '#faa'),
+        placePlanet(-8000, -1500, '#aaf'),
+        placePlanet(1000, 6600, '#afa'),
+        placePlanet(-2000, -3000, '#ff8'),
     ],
     shots: [],
 };
