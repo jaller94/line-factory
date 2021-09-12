@@ -68,9 +68,11 @@ export const step = (state, delta, world = {}, inputs) => {
     state.rotation.acceleration = inputs.turnRight * 1400;
 
     // Friction
-    state.x.speed *= 0.99;
-    state.y.speed *= 0.99;
-    state.rotation.speed *= 0.9;
+    if (delta > 0) {
+        state.x.speed *= 1 - (0.6 * delta);
+        state.y.speed *= 1 - (0.6 * delta);
+        state.rotation.speed *= 1 - (5 * delta);
+    }
 
     for(const planet of (world.planets ?? [])) {
         const distance = distanceOfActors(state, planet.state);
