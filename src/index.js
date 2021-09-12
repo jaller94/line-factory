@@ -90,7 +90,7 @@ function step(timestamp) {
             if (!shot.active) continue;
             if (distanceOfActors(shot.state, asteroid.state) < asteroid.state.size) {
                 // Add 3 new asteroids
-                if (asteroid.state.size === 12) {
+                if (asteroid.state.size === 14) {
                     world.asteroids.push(...placeAsteroidsRandomly(3, asteroid.state.x.value, asteroid.state.y.value, 0, 0, 9));
                 } else if (asteroid.state.size === 9) {
                     world.asteroids.push(...placeAsteroidsRandomly(3, asteroid.state.x.value, asteroid.state.y.value, 0, 0, 5));
@@ -133,7 +133,7 @@ function step(timestamp) {
 
     // Text for debugging
     // ctx.fillStyle = 'white';
-    // ctx.fillText(`${actualDelta - delta}`, 0, 10);
+    // ctx.fillText(`${delta}`, 0, 10);
     // ctx.fillStyle = 'black';
     window.requestAnimationFrame(step);
 }

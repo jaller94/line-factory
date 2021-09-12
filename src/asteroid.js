@@ -70,7 +70,7 @@ export const placeInAGrid = (canvas, width = 10, height = 8) => {
     return asteroids;
 }
 
-export const placeRandomly = (amount, x = 0, y = 0, width = 1024, height = 1024, size = 12) => {
+export const placeRandomly = (amount, x = 0, y = 0, width = 1024, height = 1024, size = 14) => {
     const asteroids = [];
     for (let i = 0; i < amount; i++) {
         const state = {
