@@ -44,10 +44,10 @@ const world = {
         ...placeAsteroidsRandomly(50, 0, 0),
     ],
     planets: [
-        placePlanet(4000, 0, '#faa'),
-        placePlanet(-8000, -1500, '#aaf'),
-        placePlanet(1000, 6600, '#afa'),
-        placePlanet(-2000, -3000, '#ff8'),
+        placePlanet(4000, 0, '#faa'), // red planet
+        placePlanet(-8000, -1500, '#aaf'), // blue planet
+        placePlanet(1000, 6600, '#afa'), // green planet
+        placePlanet(-2000, -3000, '#ff8'), // yellow planet
     ],
     shots: [],
 };
@@ -131,6 +131,7 @@ function step(timestamp) {
 
     ctx.restore();
 
+    // Text for debugging
     // ctx.fillStyle = 'white';
     // ctx.fillText(`${actualDelta - delta}`, 0, 10);
     // ctx.fillStyle = 'black';

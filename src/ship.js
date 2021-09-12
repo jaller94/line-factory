@@ -74,11 +74,13 @@ export const step = (state, delta, world = {}, inputs) => {
 
     for(const planet of (world.planets ?? [])) {
         const distance = distanceOfActors(state, planet.state);
-        const drag = -(planet.state.mass) / Math.pow(distance, 2);
-        const direction = directionOfActor(state, planet.state);
-        // console.debug(distance, drag, direction);
-        state.x.acceleration -= Math.sin(deg2rad(direction)) * drag * delta;
-        state.y.acceleration += Math.cos(deg2rad(direction)) * drag * delta;
+        if (distance < 3000) {
+            const drag = -(planet.state.mass) / Math.pow(distance, 2);
+            const direction = directionOfActor(state, planet.state);
+            // console.debug(distance, drag, direction);
+            state.x.acceleration -= Math.sin(deg2rad(direction)) * drag * delta;
+            state.y.acceleration += Math.cos(deg2rad(direction)) * drag * delta;
+        }
     }
 
     state.x.step(delta);
