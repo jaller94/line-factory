@@ -1,13 +1,13 @@
 import { Acceleratable, deg2rad, limit, randomInt, randomItem } from './helper.js';
 
-export const draw = (ctx, ship) => {
+export const draw = (ctx, state) => {
     ctx.save();
-    ctx.strokeStyle = ship.color;
-    ctx.translate(ship.x.value, ship.y.value);
-    ctx.rotate(deg2rad(ship.rotation.value));
+    ctx.strokeStyle = state.color;
+    ctx.translate(state.x.value, state.y.value);
+    ctx.rotate(deg2rad(state.rotation.value));
     ctx.beginPath();
     for (let i = 0; i <= 360; i += 40) {
-        ctx.lineTo(Math.sin(deg2rad(i)) * state.size + limit(4 * Math.sin((ship.seed + i) * 100), -3, 3), Math.cos(deg2rad(i)) * state.size) + limit(4 * Math.sin((ship.seed + i) * 234), -3, 3);
+        ctx.lineTo(Math.sin(deg2rad(i)) * state.size + limit(4 * Math.sin((state.seed + i) * 100), -3, 3), Math.cos(deg2rad(i)) * state.size) + limit(4 * Math.sin((state.seed + i) * 234), -3, 3);
     }
     ctx.closePath()
     ctx.stroke();
@@ -34,14 +34,14 @@ export const drawAll = (ctx, asteroids) => {
     ctx.stroke();
 }
 
-export const step = (ship, shipInputs, delta) => {
-    ship.x.step(delta);
-    ship.y.step(delta);
-    ship.rotation.step(delta);
+export const step = (state, delta) => {
+    state.x.step(delta);
+    state.y.step(delta);
+    state.rotation.step(delta);
 }
 
 export const placeInAGrid = (canvas, width = 10, height = 8) => {
-    const tanks = [];
+    const asteroids = [];
     const screenWidth = Number.parseInt(canvas.width);
     const screenHeight = Number.parseInt(canvas.height);
     for (let x = 0; x < width; x++) {
@@ -61,17 +61,17 @@ export const placeInAGrid = (canvas, width = 10, height = 8) => {
             const color = `#${'5,7,9,a,c,d,d,e,f'.split(',')[Math.floor(desiredState.x.value / (screenWidth / 8))]}${'6,7,8,9,b,e,b,8,6'.split(',')[Math.floor(desiredState.y.value / (screenHeight / 9))]}${'5,6,7,8,9,a,b,c,d'.split(',')[Math.floor(desiredState.y.value / (screenHeight / 9))]}`;
             state.color = color;
             desiredState.color = color;
-            tanks.push({
+            asteroids.push({
                 state,
                 desiredState,
             });
         }
     }
-    return tanks;
+    return asteroids;
 }
 
 export const placeRandomly = (amount, x = 0, y = 0, width = 1024, height = 1024, size = 12) => {
-    const tanks = [];
+    const asteroids = [];
     for (let i = 0; i < amount; i++) {
         const state = {
             color: `#fff`,
@@ -81,9 +81,9 @@ export const placeRandomly = (amount, x = 0, y = 0, width = 1024, height = 1024,
             seed: Math.random() * 1000,
             size,
         };
-        tanks.push({
+        asteroids.push({
             state,
         });
     }
-    return tanks;
+    return asteroids;
 };

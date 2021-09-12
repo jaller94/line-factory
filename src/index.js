@@ -1,8 +1,8 @@
 import { Acceleratable, distanceOfActors, limit } from './helper.js';
-import { collide as collideAsteroid, drawAll as drawAllAsteroids, step as stepAsteroid, placeRandomly as placeAsteroidsRandomly } from './asteroid.js';
+import { drawAll as drawAllAsteroids, step as stepAsteroid, placeRandomly as placeAsteroidsRandomly } from './asteroid.js';
 import { draw as drawPlanet, step as stepPlanet, place as placePlanet } from './planet.js';
-import { draw as drawShip, AIDriver as shipAIDriver, step as stepShip, placeInAGrid as placeTanksInAGrid } from './ship.js';
-import { collide as collideShot, draw as drawShot, step as stepShot } from './shot.js';
+import { draw as drawShip, AIDriver as shipAIDriver, step as stepShip, placeInAGrid as placeShipsInAGrid } from './ship.js';
+import { draw as drawShot, step as stepShot } from './shot.js';
 
 const canvas = document.getElementById('screen');
 const ctx = canvas.getContext('2d', {alpha : false});
@@ -37,7 +37,7 @@ const shipInputs = {
 
 const world = {
     ships: [
-        // ...placeTanksInAGrid(canvas),
+        // ...placeShipsInAGrid(canvas),
     ],
     asteroids: [
         ...placeAsteroidsRandomly(50, 0, 0),
@@ -52,6 +52,7 @@ setInterval(() => {
     world.shots = world.shots.filter(shot => shot.active);
 }, 20000);
 
+/* Main loop */
 function step(timestamp) {
     if (start === undefined) {
         start = timestamp;
@@ -62,21 +63,21 @@ function step(timestamp) {
     previousTimeStamp = timestamp;
 
     for (const asteroid of world.asteroids) {
-        stepAsteroid(asteroid.state, {}, delta);
+        stepAsteroid(asteroid.state, delta);
     }
     for (const planet of world.planets) {
-        stepPlanet(planet.state, {}, delta);
+        stepPlanet(planet.state, delta);
     }
     for (const ship of world.ships) {
         const inputs = shipAIDriver(ship.state, ship.desiredState);
-        stepShip(ship.state, inputs, delta, world);
+        stepShip(ship.state, delta, world, inputs);
     }
     for (const shot of world.shots) {
         if (!shot.active) continue;
-        stepShot(shot.state, {}, delta);
+        stepShot(shot.state, delta);
         drawShot(ctx, shot.state);
     }
-    stepShip(playerShip, shipInputs, delta, world);
+    stepShip(playerShip, delta, world, shipInputs);
     
     // Collisions
     for (const shot of world.shots) {
@@ -111,7 +112,7 @@ function step(timestamp) {
     }
 
     drawAllAsteroids(ctx, world.asteroids);
-    
+
     for (const planet of world.planets) {
         drawPlanet(ctx, planet.state);
     }

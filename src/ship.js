@@ -1,56 +1,56 @@
 import { Acceleratable, deg2rad, directionOfActor, distanceOfActors, limit, randomInt, randomItem, withinRange } from './helper.js';
 import { shoot } from './shot.js';
 
-export const AIDriver = (tank, desiredState) => {
+export const AIDriver = (state, desiredState) => {
     const inputs = {
         forward: 0,
         shooting: false,
         turnRight: 0,
     };
     // Do we need to drive to a different location?
-    if (!withinRange(tank.x.value, desiredState.x.value, 3) || !withinRange(tank.y.value, desiredState.y.value, 3)) {
-        if (tank.x.value < desiredState.x.value) {
-            inputs.forward = Math.sin(deg2rad(90 + tank.rotation.value % 360));
-        } else if (tank.x.value > desiredState.x.value) {
-            inputs.forward = -Math.sin(deg2rad(90 + tank.rotation.value % 360));
+    if (!withinRange(state.x.value, desiredState.x.value, 3) || !withinRange(state.y.value, desiredState.y.value, 3)) {
+        if (state.x.value < desiredState.x.value) {
+            inputs.forward = Math.sin(deg2rad(90 + state.rotation.value % 360));
+        } else if (state.x.value > desiredState.x.value) {
+            inputs.forward = -Math.sin(deg2rad(90 + state.rotation.value % 360));
         }
-        if (tank.y.value < desiredState.y.value) {
-            inputs.forward += -Math.cos(deg2rad(90 + tank.rotation.value % 360));
-        } else if (tank.y.value > desiredState.y.value) {
-            inputs.forward += Math.cos(deg2rad(90 + tank.rotation.value % 360));
+        if (state.y.value < desiredState.y.value) {
+            inputs.forward += -Math.cos(deg2rad(90 + state.rotation.value % 360));
+        } else if (state.y.value > desiredState.y.value) {
+            inputs.forward += Math.cos(deg2rad(90 + state.rotation.value % 360));
         }
     }
     inputs.forward = limit(inputs.forward, -1, 1);
     // Do we need to rotate?
-    const rotationDiff = ((tank.rotation.value - desiredState.rotation.value) % 360 + 360) % 360;
+    const rotationDiff = ((state.rotation.value - desiredState.rotation.value) % 360 + 360) % 360;
     if (rotationDiff > 180) {
         inputs.turnRight = 1;
     } else if (rotationDiff < 180) {
         inputs.turnRight = -1;
     }
-    // TODO: Increase acceptable error if the tank is far away from the destination and reduce it when we get closer
-    if (withinRange(tank.x.value, desiredState.x.value, 25) && !withinRange(tank.y.value, desiredState.y.value, 25)) {
-        // X-Position stimmt, aber Y-Position nicht
+    // TODO: Increase acceptable error if the ship is far away from the destination and reduce it when we get closer
+    if (withinRange(state.x.value, desiredState.x.value, 25) && !withinRange(state.y.value, desiredState.y.value, 25)) {
+        // X position is correct, but Y position needs correction
         // TODO: Intelligently pick the direction to turn to
         inputs.turnRight = 1;
-        // TODO: Increase acceptable error if the tank is far away from the destination and reduce it when we get closer
-    } else if (withinRange(tank.y.value, desiredState.y.value, 25) && !withinRange(tank.x.value, desiredState.x.value, 25)) {
-        // Y-Position stimmt, aber X-Position nicht
+        // TODO: Increase acceptable error if the ship is far away from the destination and reduce it when we get closer
+    } else if (withinRange(state.y.value, desiredState.y.value, 25) && !withinRange(state.x.value, desiredState.x.value, 25)) {
+        // Y position is good, but X position needs correction
         // TODO: Intelligently pick the direction to turn to
         inputs.turnRight = -1;
     }
-    if (withinRange(inputs.forward, 0, 0.01) && !withinRange(tank.x.value, desiredState.x.value, 25) && !withinRange(tank.y.value, desiredState.y.value, 25)) {
-        // Langsame Geschwindigkeit, aber wir sind nicht da
+    if (withinRange(inputs.forward, 0, 0.01) && !withinRange(state.x.value, desiredState.x.value, 25) && !withinRange(state.y.value, desiredState.y.value, 25)) {
+        // Handle edge case: We're slowing down, but we haven't reached our destination
         inputs.turnRight = 1;
     }
     return inputs;
 };
 
-export const draw = (ctx, ship) => {
+export const draw = (ctx, state) => {
     ctx.save();
-    ctx.strokeStyle = ship.color;
-    ctx.translate(ship.x.value, ship.y.value);
-    ctx.rotate(deg2rad(ship.rotation.value + 90));
+    ctx.strokeStyle = state.color;
+    ctx.translate(state.x.value, state.y.value);
+    ctx.rotate(deg2rad(state.rotation.value + 90));
     // Base
     ctx.beginPath();
     ctx.moveTo(0, -6);
@@ -62,39 +62,39 @@ export const draw = (ctx, ship) => {
     ctx.restore();
 }
 
-export const step = (ship, shipInputs, delta, world = {}) => {
-    ship.x.acceleration = Math.cos(deg2rad(ship.rotation.value)) * shipInputs.forward * 300;
-    ship.y.acceleration = Math.sin(deg2rad(ship.rotation.value)) * shipInputs.forward * 300;
-    ship.rotation.acceleration = shipInputs.turnRight * 1400;
+export const step = (state, delta, world = {}, inputs) => {
+    state.x.acceleration = Math.cos(deg2rad(state.rotation.value)) * inputs.forward * 300;
+    state.y.acceleration = Math.sin(deg2rad(state.rotation.value)) * inputs.forward * 300;
+    state.rotation.acceleration = inputs.turnRight * 1400;
 
     // Friction
-    ship.x.speed *= 0.99;
-    ship.y.speed *= 0.99;
-    ship.rotation.speed *= 0.9;
+    state.x.speed *= 0.99;
+    state.y.speed *= 0.99;
+    state.rotation.speed *= 0.9;
 
     for(const planet of (world.planets ?? [])) {
-        const distance = distanceOfActors(ship, planet.state);
+        const distance = distanceOfActors(state, planet.state);
         const drag = -(planet.state.mass) / Math.pow(distance, 2);
-        const direction = directionOfActor(ship, planet.state);
+        const direction = directionOfActor(state, planet.state);
         // console.debug(distance, drag, direction);
-        ship.x.acceleration -= Math.sin(deg2rad(direction)) * drag * delta;
-        ship.y.acceleration += Math.cos(deg2rad(direction)) * drag * delta;
+        state.x.acceleration -= Math.sin(deg2rad(direction)) * drag * delta;
+        state.y.acceleration += Math.cos(deg2rad(direction)) * drag * delta;
     }
 
-    ship.x.step(delta);
-    ship.y.step(delta);
-    ship.rotation.step(delta);
+    state.x.step(delta);
+    state.y.step(delta);
+    state.rotation.step(delta);
 
-    ship.lastShot += delta;
+    state.lastShot += delta;
 
-    if (shipInputs.shooting && ship.lastShot > 0.4) {
-        world.shots.push(shoot(ship));
-        ship.lastShot = 0;
+    if (inputs.shooting && state.lastShot > 0.4) {
+        world.shots.push(shoot(state));
+        state.lastShot = 0;
     }
 }
 
 export const placeInAGrid = (canvas, width = 10, height = 8) => {
-    const tanks = [];
+    const ships = [];
     const screenWidth = Number.parseInt(canvas.width);
     const screenHeight = Number.parseInt(canvas.height);
     for (let x = 0; x < width; x++) {
@@ -115,17 +115,17 @@ export const placeInAGrid = (canvas, width = 10, height = 8) => {
             const color = `#${'5,7,9,a,c,d,d,e,f'.split(',')[Math.floor(desiredState.x.value / (screenWidth / 8))]}${'6,7,8,9,b,e,b,8,6'.split(',')[Math.floor(desiredState.y.value / (screenHeight / 9))]}${'5,6,7,8,9,a,b,c,d'.split(',')[Math.floor(desiredState.y.value / (screenHeight / 9))]}`;
             state.color = color;
             desiredState.color = color;
-            tanks.push({
+            ships.push({
                 state,
                 desiredState,
             });
         }
     }
-    return tanks;
+    return ships;
 }
 
 export const placeRandomly = (amount, x = 0, y = 0, width = 1024, height = 1024) => {
-    const tanks = [];
+    const ships = [];
     for (let i = 0; i < amount; i++) {
         const state = {
             color: `#${randomItem('5,7,9,a,c,d,d,e,f'.split(','))}${randomItem('5,7,9,a,c,d,d,e,f'.split(','))}${randomItem('5,7,9,a,c,d,d,e,f'.split(','))}`,
@@ -142,10 +142,10 @@ export const placeRandomly = (amount, x = 0, y = 0, width = 1024, height = 1024)
         const color = `#${'5,7,9,a,c,d,d,e,f'.split(',')[Math.floor(desiredState.x.value / (screenWidth / 8))]}${'6,7,8,9,b,e,b,8,6'.split(',')[Math.floor(desiredState.y.value / (screenHeight / 9))]}${'5,6,7,8,9,a,b,c,d'.split(',')[Math.floor(desiredState.y.value / (screenHeight / 9))]}`;
         state.color = color;
         desiredState.color = color;
-        tanks.push({
+        ships.push({
             state,
             desiredState,
         });
     }
-    return tanks;
+    return ships;
 };
