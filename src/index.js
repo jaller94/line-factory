@@ -24,8 +24,8 @@ window.addEventListener('resize', () => {
 
 const playerShip = {
     color: '#fff',
-    x: new Acceleratable(50),
-    y: new Acceleratable(50),
+    x: new Acceleratable(0),
+    y: new Acceleratable(0),
     rotation: new Acceleratable(0),
     lastShot: 1000,
 };
@@ -42,13 +42,13 @@ const world = {
         // ...placeShipsRandomly(500, -8000, -8000, 8000, 8000),
     ],
     asteroids: [
-        ...placeAsteroidsRandomly(50, 0, 0),
+        ...placeAsteroidsRandomly(400, -2000, -2000, 4000, 4000),
     ],
     planets: [
         placePlanet(4000, 0, '#faa'), // red planet
         placePlanet(-8000, -1500, '#aaf'), // blue planet
         placePlanet(1000, 6600, '#afa'), // green planet
-        placePlanet(-2000, -3000, '#ff8'), // yellow planet
+        placePlanet(-2000, -4000, '#ff8'), // yellow planet
     ],
     shots: [],
 };
@@ -158,20 +158,20 @@ window.addEventListener('keydown', event => {
 });
 
 window.addEventListener('keyup', event => {
-    if (event.key === 'ArrowUp') {
+    if (event.key === 'ArrowUp' && shipInputs.forward > 0) {
         shipInputs.forward = 0;
-    }
-    if (event.key === 'ArrowDown') {
+    } else if (event.key === 'ArrowDown' && shipInputs.forward < 0) {
         shipInputs.forward = 0;
-    }
-    if (event.key === 'ArrowRight') {
+    } else if (event.key === 'ArrowRight' && shipInputs.turnRight > 0) {
         shipInputs.turnRight = 0;
-    }
-    if (event.key === 'ArrowLeft') {
+    } else if (event.key === 'ArrowLeft' && shipInputs.turnRight < 0) {
         shipInputs.turnRight = 0;
-    }
-    if (event.key === 'Space' || event.key === ' ') {
+    } else if (event.key === 'Space' || event.key === ' ') {
         shipInputs.shooting = false;
+    } else if (event.key.toLowerCase() === 'r') {
+        playerShip.x = new Acceleratable(0);
+        playerShip.y = new Acceleratable(0);
+        playerShip.rotation = new Acceleratable(0);
     }
 });
 
@@ -209,7 +209,9 @@ document.getElementById('w').addEventListener('pointerdown', event => {
 const handlePointerUp = (event) => {
     const button = pressedPointers[event.pointerId];
     if (!button) return;
-    if (button === 'l' || button === 'r') {
+    if (button === 'r' && shipInputs.turnRight > 0) {
+        shipInputs.turnRight = 0;
+    } else if (button === 'l' && shipInputs.turnRight < 0) {
         shipInputs.turnRight = 0;
     } else if (button === 'f') {
         shipInputs.forward = 0;

@@ -91,7 +91,7 @@ export const step = (state, delta, world = {}, inputs) => {
 
     state.lastShot += delta;
 
-    if (inputs.shooting && state.lastShot > 0.4) {
+    if (inputs.shooting && state.lastShot > 0.5) {
         world.shots.push(shoot(state));
         state.lastShot = 0;
     }
