@@ -2,7 +2,7 @@ import { Acceleratable, distanceOfActors, limit } from './helper.js';
 import { drawAll as drawAllAsteroids, step as stepAsteroid, placeRandomly as placeAsteroidsRandomly } from './asteroid.js';
 import { draw as drawMarker } from './marker.js';
 import { draw as drawPlanet, step as stepPlanet, place as placePlanet } from './planet.js';
-import { draw as drawShip, AIDriver as shipAIDriver, step as stepShip, placeInAGrid as placeShipsInAGrid } from './ship.js';
+import { draw as drawShip, AIDriver as shipAIDriver, step as stepShip, placeInAGrid as placeShipsInAGrid, placeRandomly as placeShipsRandomly } from './ship.js';
 import { draw as drawShot, step as stepShot } from './shot.js';
 
 const canvas = document.getElementById('screen');
@@ -39,6 +39,7 @@ const shipInputs = {
 const world = {
     ships: [
         // ...placeShipsInAGrid(canvas),
+        // ...placeShipsRandomly(500, -8000, -8000, 8000, 8000),
     ],
     asteroids: [
         ...placeAsteroidsRandomly(50, 0, 0),
@@ -205,7 +206,7 @@ document.getElementById('w').addEventListener('pointerdown', event => {
     event.target.classList.add('pressed');
     pressedPointers[event.pointerId] = 'w';
 });
-const handlePointerUp = () => {
+const handlePointerUp = (event) => {
     const button = pressedPointers[event.pointerId];
     if (!button) return;
     if (button === 'l' || button === 'r') {

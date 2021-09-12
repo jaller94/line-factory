@@ -135,7 +135,7 @@ export const placeRandomly = (amount, x = 0, y = 0, width = 1024, height = 1024)
             color: `#${randomItem('5,7,9,a,c,d,d,e,f'.split(','))}${randomItem('5,7,9,a,c,d,d,e,f'.split(','))}${randomItem('5,7,9,a,c,d,d,e,f'.split(','))}`,
             x: new Acceleratable(randomInt(x, x + width)),
             y: new Acceleratable(randomInt(y, y + height)),
-            rotation: new Acceleratable(0),
+            rotation: new Acceleratable(randomInt(0, 359)),
         };
         const desiredState = {
             ...state,
@@ -143,9 +143,6 @@ export const placeRandomly = (amount, x = 0, y = 0, width = 1024, height = 1024)
             y: new Acceleratable(randomInt(y, y + height)),
             rotation: new Acceleratable(randomInt(0, 359)),
         };
-        const color = `#${'5,7,9,a,c,d,d,e,f'.split(',')[Math.floor(desiredState.x.value / (screenWidth / 8))]}${'6,7,8,9,b,e,b,8,6'.split(',')[Math.floor(desiredState.y.value / (screenHeight / 9))]}${'5,6,7,8,9,a,b,c,d'.split(',')[Math.floor(desiredState.y.value / (screenHeight / 9))]}`;
-        state.color = color;
-        desiredState.color = color;
         ships.push({
             state,
             desiredState,
