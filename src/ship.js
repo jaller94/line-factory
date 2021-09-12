@@ -71,7 +71,7 @@ export const step = (state, delta, world = {}, inputs) => {
     if (delta > 0) {
         state.x.speed *= 1 - (0.6 * delta);
         state.y.speed *= 1 - (0.6 * delta);
-        state.rotation.speed *= 1 - (5 * delta);
+        state.rotation.speed *= 1 - (8 * delta);
     }
 
     for(const planet of (world.planets ?? [])) {
