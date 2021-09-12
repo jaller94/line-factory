@@ -7,8 +7,7 @@ export const draw = (ctx, state) => {
     ctx.rotate(deg2rad(state.rotation.value));
     // Outer surface
     ctx.beginPath();
-    const i2 = 0;
-    ctx.moveTo(Math.sin(deg2rad(i2)) * state.size + limit(30 * Math.sin((state.seed + i2) * 0.2), -30, 30), Math.cos(deg2rad(i2)) * state.size);
+    ctx.moveTo(Math.sin(deg2rad(0)) * state.size + limit(30 * Math.sin((state.seed + 0) * 0.2), -30, 30), Math.cos(deg2rad(0)) * state.size);
     for (let i = 0.5; i < 360; i += 0.5) {
         ctx.lineTo(Math.sin(deg2rad(i)) * state.size + limit(30 * Math.sin((state.seed + i) * 0.2), -30, 30), Math.cos(deg2rad(i)) * state.size) + limit(4 * Math.sin((state.seed + i) * 234), -3, 3);
     }

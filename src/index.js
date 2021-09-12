@@ -1,5 +1,6 @@
 import { Acceleratable, distanceOfActors, limit } from './helper.js';
 import { drawAll as drawAllAsteroids, step as stepAsteroid, placeRandomly as placeAsteroidsRandomly } from './asteroid.js';
+import { draw as drawMarker } from './marker.js';
 import { draw as drawPlanet, step as stepPlanet, place as placePlanet } from './planet.js';
 import { draw as drawShip, AIDriver as shipAIDriver, step as stepShip, placeInAGrid as placeShipsInAGrid } from './ship.js';
 import { draw as drawShot, step as stepShot } from './shot.js';
@@ -43,7 +44,7 @@ const world = {
         ...placeAsteroidsRandomly(50, 0, 0),
     ],
     planets: [
-        // placePlanet(4000, 0),
+        placePlanet(4000, 0),
     ],
     shots: [],
 };
@@ -115,6 +116,7 @@ function step(timestamp) {
 
     for (const planet of world.planets) {
         drawPlanet(ctx, planet.state);
+        drawMarker(ctx, planet.state, playerShip);
     }
 
     for (const shot of world.shots) {
