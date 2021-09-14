@@ -25,10 +25,10 @@ The map has an asteroid field and four planets. The player can shoot the asteroi
 * Andrzej for organizing the js13kGames each year and being super responsive.
 
 ## License
-Released under the MIT license.
+Released under the MIT license.  
 See LICENSE file for more information.
 
-Developed by Christian Paul.
-Feel free to contact me at:
-https://gitlab.com/jaller94
+Developed by Christian Paul.  
+Feel free to contact me at:  
+https://gitlab.com/jaller94  
 https://chrpaul.de
