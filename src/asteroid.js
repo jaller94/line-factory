@@ -1,5 +1,10 @@
 import { Acceleratable, deg2rad, limit, randomInt, randomItem } from './helper.js';
 
+const surface = (size, seed, deg) => {
+    const hill = limit(4 * Math.sin(seed + deg * seed * 1.2321), -3, 3)
+    return size + hill;
+};
+
 export const draw = (ctx, state) => {
     ctx.save();
     ctx.strokeStyle = state.color;
@@ -7,7 +12,8 @@ export const draw = (ctx, state) => {
     ctx.rotate(deg2rad(state.rotation.value));
     ctx.beginPath();
     for (let i = 0; i <= 360; i += 40) {
-        ctx.lineTo(Math.sin(deg2rad(i)) * state.size + limit(4 * Math.sin((state.seed + i) * 100), -3, 3), Math.cos(deg2rad(i)) * state.size) + limit(4 * Math.sin((state.seed + i) * 234), -3, 3);
+        const dist = surface(state.size, state.seed, i);
+        ctx.lineTo(Math.sin(deg2rad(i)) * dist, Math.cos(deg2rad(i)) * dist);
     }
     ctx.closePath()
     ctx.stroke();
@@ -23,11 +29,14 @@ export const drawAll = (ctx, asteroids) => {
         ctx.translate(state.x.value, state.y.value);
         ctx.rotate(deg2rad(state.rotation.value));
         
-        ctx.moveTo(Math.sin(0) * state.size + limit(4 * Math.sin(state.seed), -3, 3), Math.cos(0) * state.size);
-        for (let i = 40; i < 360; i += 40) {
-            ctx.lineTo(Math.sin(deg2rad(i)) * state.size + limit(4 * Math.sin(state.seed + i * state.seed * 1.2321), -3, 3), Math.cos(deg2rad(i)) * state.size) + limit(4 * Math.sin(state.seed + i * state.seed * 1.523), -3, 3);
+        for (let i = 0; i <= 360; i += 40) {
+            const dist = surface(state.size, state.seed, i === 360 ? 0 : i);
+            if (i === 0) {
+                ctx.moveTo(Math.sin(deg2rad(i)) * dist, Math.cos(deg2rad(i)) * dist);
+            } else {
+                ctx.lineTo(Math.sin(deg2rad(i)) * dist, Math.cos(deg2rad(i)) * dist);
+            }
         }
-        ctx.lineTo(Math.sin(0) * state.size + limit(4 * Math.sin(state.seed), -3, 3), Math.cos(0) * state.size);
 
         ctx.restore();
     }

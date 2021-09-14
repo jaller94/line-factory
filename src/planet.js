@@ -1,22 +1,26 @@
 import { Acceleratable, deg2rad, limit, randomInt } from './helper.js';
 
+const maxHill = 30;
+
+const surface = (size, seed, deg) => {
+    let hill = limit(maxHill * Math.sin((seed + deg) / (2 * Math.PI)), 0.9 * -maxHill, 0.9 * maxHill);
+    hill += maxHill / 3 * Math.sin((seed * 2 + deg + 34));
+    hill += maxHill / 4 * Math.sin((seed * 2 + deg));
+    hill += maxHill / 5 * Math.sin(((seed * 3 + deg + 128) * 1.6));
+    hill += maxHill / 7 * Math.sin(((seed * 3 + deg + 56) * 3.2));
+    return size + hill;
+};
+
 export const draw = (ctx, state) => {
     ctx.save();
     ctx.strokeStyle = state.color;
-    const maxHill = 30;
     ctx.translate(state.x.value, state.y.value);
     ctx.rotate(deg2rad(state.rotation.value));
     // Outer surface
     ctx.beginPath();
     for (let i = 0; i < 360; i += 0.5) {
-        let hill = limit(maxHill * Math.sin((state.seed + i) / (2 * Math.PI)), 0.9 * -maxHill, 0.9 * maxHill);
-        hill += maxHill / 3 * Math.sin((state.seed * 2 + i + 34));
-        hill += maxHill / 4 * Math.sin((state.seed * 2 + i));
-        hill += maxHill / 5 * Math.sin(((state.seed * 3 + i + 128) * 1.6));
-        hill += maxHill / 7 * Math.sin(((state.seed * 3 + i + 56) * 3.2));
-        const x = Math.sin(deg2rad(i)) * state.size + Math.sin(deg2rad(i)) * hill;
-        const y = Math.cos(deg2rad(i)) * state.size + Math.cos(deg2rad(i)) * hill;
-        ctx.lineTo(x, y);
+        const dist = surface(state.size, state.seed, i);
+        ctx.lineTo(Math.sin(deg2rad(i)) * dist, Math.cos(deg2rad(i)) * dist);
     }
     ctx.closePath();
     ctx.stroke();
