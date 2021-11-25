@@ -13,7 +13,7 @@
     },
     "sourceMap": false,
     "devDependencies": {
-        "jest": "^27.1.0",
-        "parcel": "latest"
+        "jest": "^27.3.1",
+        "parcel": "^2.0.1"
     }
 }
